@@ -21,12 +21,21 @@ consulta(7/6/19, 4, 2, 15).
 registarU(A, B, C, D) :- \+ utente(A,_,_,_) , assert(utente(A,B,C,D)).
 %Extensao do predicado registarS: Elemento, Elemento, Elemento, Elemento -> {V,F}
 registarS(A,B,C,D) :- \+ servico(A,_,_,_) , assert(servico(A,B,C,D)).
-%Extensao do predicado registarC : Elemento, Elemento, Elemento, Elemento -> {V,F}
-registarC(A,B,C,D) :- assert(consulta(A,B,C,D)).
+%Extensao do predicado registarC: Elemento, Elemento, Elemento, Elemento -> {V,F}
+registarC(A,B,C,D) :- +\ utente(B,_,_,_), \+ servico(C,_,_,_), assert(consulta(A,B,C,D)).
 
 %Questão 2
+%Extensao do predicado apagarU: Elemento -> {V,F}
+apagarU(X) :- utente(X,_,_,_), retract(utente(X,_,_,_)).
+%Extensao do predicado apagarS: Elemento -> {V,F}
+apagarS(X) :- servico(X,_,_,_), retract(servico(X,_,_,_)).
+%Extensao do predicado apagarC: Elemento -> Elemento -> {V,F}
+apagarC(X,Y) :- consulta(_,X,Y,_), retract(consulta(_,X,Y,_)). 
+
 
 %Questão 3
+%Extensao do predicado instituicao: Lista -> {V,F}
+%instituicao([]) :- 
 
 %Questão 4
 
