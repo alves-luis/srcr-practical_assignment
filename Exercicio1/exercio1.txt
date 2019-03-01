@@ -22,7 +22,7 @@ registarU(A, B, C, D) :- \+ utente(A,_,_,_) , assert(utente(A,B,C,D)).
 %Extensao do predicado registarS: Elemento, Elemento, Elemento, Elemento -> {V,F}
 registarS(A,B,C,D) :- \+ servico(A,_,_,_) , assert(servico(A,B,C,D)).
 %Extensao do predicado registarC: Elemento, Elemento, Elemento, Elemento -> {V,F}
-registarC(A,B,C,D) :- +\ utente(B,_,_,_), \+ servico(C,_,_,_), assert(consulta(A,B,C,D)).
+registarC(A,B,C,D) :- \+ utente(B,_,_,_), \+ servico(C,_,_,_), assert(consulta(A,B,C,D)).
 
 %Questão 2
 %Extensao do predicado apagarU: Elemento -> {V,F}
@@ -35,7 +35,8 @@ apagarC(X,Y) :- consulta(_,X,Y,_), retract(consulta(_,X,Y,_)).
 
 %Questão 3
 %Extensao do predicado instituicao: Lista -> {V,F}
-%instituicao([]) :- 
+%instituicao([]).
+%instituicao([H|T]) :- servico(_,_,H,_),\+ pertence(H, T), instituicao(T).
 
 %Questão 4
 
@@ -46,3 +47,9 @@ apagarC(X,Y) :- consulta(_,X,Y,_), retract(consulta(_,X,Y,_)).
 %Questão 7
 
 %Questão 8
+
+
+
+% Extensão do predicado pertence: Elemento, Lista -> {V,F}
+pertence(X, [X|T]).
+pertence(X, [H|T]) :-  X \= H, pertence(X, T).
