@@ -31,13 +31,14 @@ sexo('F',4).
 
 servico(1, dentista, 'hospital', braga).
 servico(2, familia, 'clinica', braga).
-servico(3, cirurgia, 'privado', braga).
-servico(4, ortopedia, 'hospital', braga).
+servico(3, cirurgia, 'privado', barcelos).
+servico(4, ortopedia, 'hospital', lisboa).
 
-consulta(19/3/19, 1, 3, 25).
-consulta(23/4/19, 2, 1, 3).
-consulta(3/3/19, 3, 3, 33).
-consulta(7/6/19, 4, 2, 15).
+consulta('19/3/19', 1, 3, 25).
+consulta('23/4/19', 2, 1, 3).
+consulta('3/3/19', 3, 3, 33).
+consulta('7/6/19', 4, 2, 15).
+consulta('7/6/19', 1, 2, 15).
 
 %Questão 1
 
@@ -72,6 +73,23 @@ consulta(7/6/19, 4, 2, 15).
   % Extensao do predicado utentePorIdade: Idade do Utente, Lista de Utentes  -> {V,F}
   utentePorIdade(I,L) :- solucoes(Nome,utente(_,Nome,I,_),L).
 
+  % Extensao do predicado servicosEmCidade: Cidade, Lista de Servicos  -> {V,F}
+  servicosEmCidade(C,L):- solucoes(S, servico(_,S,_,C),L).
+  % Extensao do predicado todosServicos: Lista de Servicos  -> {V,F}
+  todosServicos(L):- solucoes(S, servico(_,S,_,_),L).
+  % Extensao do predicado servicoInstituicaoLocal: Instituicao, Lista de Servicos  -> {V,F}
+  servicoInstituicaoLocal(I,L):- solucoes((C,S), servico(_,S,I,C),L).
+
+  % Extensao do predicado consultasPorDia: Dia, Lista de Consultas  -> {V,F}
+  consultasPorDia(D,L) :- solucoes(Id , consulta(D,Id,_,_) , X),
+                         getId(X,L).
+  % Extensao do predicado consultasServiço: Data, Serviço, NumConsultas  -> {V,F}
+  consultasServico(D,S,N) :-  servico(IdS,S,_,_),
+                              solucoes(Id , consulta(D,Id,IdS,_), L),
+                              countElements(L,N).
+  % Extensao do predicado ganhoPorDia: Data, Valor  -> {V,F}
+  ganhoPorDia(D,T) :-  solucoes(Valor , consulta(D,_,_,Valor), L),
+                       sumElements(L,T).
 %Questão 5
 
 %Questão 6
@@ -108,3 +126,15 @@ construir(S,S).
 semRepetidos([],[]).
 semRepetidos([H|T],S) :-  pertence(H,T) , semRepetidos(T,S).
 semRepetidos([H|T],[H|S]) :- nao(pertence(H,T)) , semRepetidos(T,S).
+
+% Extensão do predicado getId:: ListaId, ListaNomes -> {V,F}
+getId([],[]).
+getId([H1|C1],[N|C]) :- utente(H1,N,_,_), getId(C1,C).
+
+% Extensão do predicado countElements:: ListaId, NumConsultas -> {V,F}
+countElements([],0).
+countElements([H|B],N) :- countElements(B,M), N is M+1.
+
+% Extensão do predicado sumElements:: ListaValores, Total -> {V,F}
+sumElements([],0).
+sumElements([H|B],T) :- sumElements(B,M), T is M+H.
