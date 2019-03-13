@@ -19,44 +19,60 @@
 :- dynamic servico/4.
 :- dynamic consulta/4.
 
-utente(1, andre, 20, espanha).
-utente(2, joao, 20, braga).
-utente(3, luis, 21, braga).
-utente(4, rafaela, 20, braga).
+utente(1, 'André', 20, 'Espanha').
+utente(2, 'João', 20, 'Braga').
+utente(3, 'Luís', 21, 'Braga').
+utente(4, 'Rafaela', 20, 'Braga').
 
 sexo('M',1).
 sexo('M',2).
 sexo('M',3).
 sexo('F',4).
 
-servico(1, dentista, 'hospital', braga).
-servico(2, familia, 'clinica', braga).
-servico(3, cirurgia, 'privado', barcelos).
-servico(4, ortopedia, 'hospital', lisboa).
+servico(1, 'Ortodontia', 'Hospital', 'Braga').
+servico(2, 'Medicina Geral', 'Clínica', 'Braga').
+servico(3, 'Oftalmologia', 'Privado', 'Barcelos').
+servico(4, 'Ortopedia', 'Hospital', 'Lisboa').
 
 consulta('19/3/19', 1, 3, 25).
 consulta('23/4/19', 2, 1, 3).
 consulta('3/3/19', 3, 3, 33).
-consulta('7/6/19', 4, 2, 15).
+consulta('7/6/19', 3, 2, 15).
 consulta('7/6/19', 1, 2, 15).
 
 %Questão 1
 
-  %Extensao do predicado registarU: IdUtente, NomeUtente, Idade, Cidade -> {V,F}
-  registarU(ID, N, I, C) :- \+ utente(ID,_,_,_) , assert(utente(ID,N,I,C)).
-  %Extensao do predicado registarS: IdServico, Descricao, Instituicao, Cidade -> {V,F}
-  registarS(ID,D,I,C) :- \+ servico(A,_,_,_) , assert(servico(ID,D,I,C)).
-  %Extensao do predicado registarC: Data, IdUtente, IdServico, Custo -> {V,F}
-  registarC(D,IdU,IdS,C) :- \+ utente(D,_,_,_), \+ servico(D,_,_,_), assert(consulta(D,IdU,IdS,C)).
+  % Extensao do predicado registarU: IdUtente, NomeUtente, Idade, Cidade -> {V,F}
+  % Só pode registar se não existir utente com o mesmo ID
+  registarU(ID, N, I, C) :- nao(utente(ID,_,_,_)),
+    assert(utente(ID,N,I,C)).
+  % Extensao do predicado registarS: IdServico, Descricao, Instituicao, Cidade -> {V,F}
+  % Só pode registar serviço se não existir serviço com o mesmo ID
+  registarS(ID,D,I,C) :- nao(servico(A,_,_,_)),
+    assert(servico(ID,D,I,C)).
+  % Extensao do predicado registarC: Data, IdUtente, IdServico, Custo -> {V,F}
+  % Só pode registar consulta se não existir para o mesmo serviço no mesmo Dia
+  % Se o Custo for maior que 0, se existir o utente e se existir o serviço
+  registarC(D,IdU,IdS,C) :-
+    nao(consulta(D,IdU,IdS,_)),
+    C > 0,
+    utente(IdU,_,_,_),
+    servico(IdS,_,_,_),
+    assert(consulta(D,IdU,IdS,C)).
 
 %Questão 2
 
-  %Extensao do predicado apagarU: IdUtente -> {V,F}
-  apagarU(ID) :- utente(ID,_,_,_), retract(utente(ID,_,_,_)).
-  %Extensao do predicado apagarS: IdServico -> {V,F}
-  apagarS(ID) :- servico(IdServico,_,_,_), retract(servico(IdServico,_,_,_)).
-  %Extensao do predicado apagarC: Data -> IdUtente -> {V,F}
-  apagarC(D,ID) :- consulta(D,ID,_,_), retract(consulta(D,ID,_,_)).
+  % Extensao do predicado apagarU: IdUtente -> {V,F}
+  % Só pode remover utente se existir o utente e não existirem consultas
+  % Com esse utente.
+  apagarU(ID) :- utente(ID,_,_,_), nao(consulta(_,ID,_,_)), retract(utente(ID,_,_,_)).
+  % Extensao do predicado apagarS: IdServico -> {V,F}
+  % Só pode remover serviço se existir o serviço e não existirem consultas
+  % Desse serviço
+  apagarS(ID) :- servico(ID,_,_,_), nao(consulta(_,_,ID,_)), retract(servico(IdServico,_,_,_)).
+  % Extensao do predicado apagarC: Data -> IdUtente -> IdServiço -> {V,F}
+  % Só pode apagar uma consulta se existir essa consulta
+  apagarC(D,ID,IDS) :- consulta(D,ID,IDS,_), retract(consulta(D,ID,IDS,_)).
 
 
 %Questão 3
@@ -113,13 +129,12 @@ nao(T) :- T, !,fail.
 nao(T).
 
 % Extensão do predicado solucoes: Formato, Prova, LSolucoes -> {V,F}
+%solucoes(F,P,L) :- findall(F,P,L).
+solucoes(F,P,S) :- P , assert(tmp(F)), fail.
+solucoes(F,P,S) :- construir(S,[]).
 
-solucoes(F,P,L) :- findall(F,P,L).
-%solucoes(F,P,S) :- P, assert(tmp(F)),fail.
-%solucoes(F,P,S) :- construir([],S).
-
-% Extensão do predicado construir: LInicial, Solucao-> {V,F}
-construir(LI,S) :- retract(tmp(X)), ! ,construir([X|S],S).
+% Extensão do predicado construir: Solucao, Lista-> {V,F}
+construir(S,L) :- retract(tmp(X)), ! ,construir(S,[X|L]).
 construir(S,S).
 
 % Extensão do predicado semRepetidos:: ListaComRepetidos, ListaSemRepetidos -> {V,F}
