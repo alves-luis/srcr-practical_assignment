@@ -176,7 +176,6 @@ nao(T) :- T, !,fail.
 nao(T).
 
 % Extensão do predicado solucoes: Formato, Prova, LSolucoes -> {V,F}
-%solucoes(F,P,L) :- findall(F,P,L).
 solucoes(F,P,L) :- P , assert(tmp(F)), fail.
 solucoes(F,P,L) :- construir(L,[]).
 
@@ -196,3 +195,15 @@ countElements([H|B],N) :- countElements(B,M), N is M+1.
 % Extensão do predicado sumElements:: ListaValores, Total -> {V,F}
 sumElements([],0).
 sumElements([H|B],T) :- sumElements(B,M), T is M+H.
+
+% Extensãoo do predicado que permite a evolucao do conhecimento
+% evolução: Termo -> {V,F}
+evolucao( T ) :- solucoes( I, +T::I, LInv),
+                 insercao(T),
+                 teste(LInv).
+
+teste([]).
+teste([I|L]) :- I, teste(L).
+
+insercao(T) :- assert(T).
+insercao(T) :- retract(T), fail.
