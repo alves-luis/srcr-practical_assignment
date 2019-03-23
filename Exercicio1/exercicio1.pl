@@ -68,8 +68,6 @@ consulta('7/6/19', 1, 2, 15).
 % Questão 2 - Remover utentes, serviços e consultas;
 
   % Extensao do predicado apagarU: IdUtente -> {V,F}
-  % Só pode remover utente se existir o utente e não existirem consultas
-  % Com esse utente e existir registo do seu sexo.
   apagarU(ID) :- utente(ID,_,_,_),
     nao(consulta(_,ID,_,_)),
     sexo(_,ID),
@@ -196,7 +194,7 @@ countElements([H|B],N) :- countElements(B,M), N is M+1.
 sumElements([],0).
 sumElements([H|B],T) :- sumElements(B,M), T is M+H.
 
-% Extensãoo do predicado que permite a evolucao do conhecimento
+% Extensão do predicado que permite a evolucao do conhecimento
 % evolução: Termo -> {V,F}
 evolucao( T ) :- solucoes( I, +T::I, LInv),
                  insercao(T),
@@ -206,4 +204,19 @@ teste([]).
 teste([I|L]) :- I, teste(L).
 
 insercao(T) :- assert(T).
-insercao(T) :- retract(T), fail.
+insercao(T) :- retract(T), !, fail.
+
+% Extensão do predicado que permite a involução do conhecimento
+% involução: Termo -> {V,F}
+involucao( T ) :- T,
+                solucoes(I, -T::I, LInv),
+                remocao(T),
+                teste(LInv).
+
+remocao(T) :- retract(T).
+remocao(T) :- assert(T), !, fail.
+
+% Invariante Referencial
+% Só pode remover utente se existir o utente e não existirem consultas
+% Com esse utente e existir registo do seu sexo.
+-utente(Id,No,In,Ci) :: (nao(consulta(_,Id,_,_)) , sexo(_,Id)).
