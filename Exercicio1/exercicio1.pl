@@ -34,7 +34,7 @@ utente(11, 'Orlando', 50, 'Braga').
 utente(12, 'Nestor', 45, 'Esposende').
 utente(13, 'Moura', 55, 'Viana do Castelo').
 utente(14, 'Barros', 33, 'Paredes de Coura').
-utente(15, 'Proenca', '60', 'Figueira da Foz').
+utente(15, 'Proenca', 60, 'Figueira da Foz').
 
 % Extensão do predicado Sexo: Sexo, Id -> {V,F}
 sexo('M',1).
@@ -68,6 +68,7 @@ servico(6, 'Medicina Dentaria', 'Hospital de S.Marcos', 'Braga').
 servico(7, 'Oncologia', 'Hospital da Luz', 'Lisboa').
 servico(8, 'Psiquiatria', 'Clinica de Santa Tecla', 'Braga').
 servico(9, 'Dermatologia', 'Hospital Privado XPTO', 'Barcelos').
+
 % Extensão do predicado consulta: Data, IdUtente, IdServiço, Custo -> {V,F}
 consulta(data(19,3,2019), 1, 3, 25).
 consulta(data(23,4,2019), 2, 1, 3).
@@ -193,7 +194,7 @@ apagarU(ID) :- involucao(utente(ID,_,_,_)),
 % Extensao do predicado apagarS: IdServico -> {V,F}
 % Só pode remover serviço se existir o serviço e não existirem consultas
 % Desse serviço
-apagarS(ID) :- involucao(servico(Id,_,_,_)).
+apagarS(Id) :- involucao(servico(Id,_,_,_)).
 
 % Invariante referencial
 % Só pode remover servico se não existir consulta com esse Id
