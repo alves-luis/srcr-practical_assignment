@@ -30,6 +30,11 @@ utente(7, 'Vitorino', 30, 'Lisboa').
 utente(8, 'Zeferino', 37, 'Faro').
 utente(9, 'Miguelito', 42, 'Outeiro').
 utente(10, 'Jacinto', 43, 'Faro').
+utente(11, 'Orlando', 50, 'Braga').
+utente(12, 'Nestor', 45, 'Esposende').
+utente(13, 'Moura', 55, 'Viana do Castelo').
+utente(14, 'Barros', 33, 'Paredes de Coura').
+utente(15, 'Proenca', '60', 'Figueira da Foz').
 
 % Extensão do predicado Sexo: Sexo, Id -> {V,F}
 sexo('M',1).
@@ -42,6 +47,11 @@ sexo('M',7).
 sexo('M',8).
 sexo('M',9).
 sexo('M',10).
+sexo('M',11).
+sexo('M',12).
+sexo('M',13).
+sexo('M',14).
+sexo('M',15).
 
 % Extensão do predicado sexoValido: Sexo -> {V,F}
 sexoValido('M').
@@ -53,13 +63,27 @@ servico(1, 'Ortodontia', 'Hospital de S.Marcos', 'Braga').
 servico(2, 'Medicina Geral', 'Clinica de Santa Tecla', 'Braga').
 servico(3, 'Oftalmologia', 'Hospital Privado XPTO', 'Barcelos').
 servico(4, 'Ortopedia', 'Hospital de Ourique', 'Lisboa').
-
+servico(5, 'Psicologia', 'Hospital da Nossa Senhora do 20', 'Guimaraes').
+servico(6, 'Medicina Dentaria', 'Hospital de S.Marcos', 'Braga').
+servico(7, 'Oncologia', 'Hospital da Luz', 'Lisboa').
+servico(8, 'Psiquiatria', 'Clinica de Santa Tecla', 'Braga').
+servico(9, 'Dermatologia', 'Hospital Privado XPTO', 'Barcelos').
 % Extensão do predicado consulta: Data, IdUtente, IdServiço, Custo -> {V,F}
 consulta(data(19,3,2019), 1, 3, 25).
 consulta(data(23,4,2019), 2, 1, 3).
 consulta(data(3,3,2019), 1, 3, 33).
 consulta(data(7,7,2019), 3, 2, 15).
 consulta(data(7,7,2019), 1, 2, 15).
+consulta(data(8,3,2019),5,7,30).
+consulta(data(25,4,2019),8,8,8).
+consulta(data(3,3,2023),15,5,40).
+consulta(data(4,9,2019),12,7,50).
+consulta(data(24,12,2019),9,5,20).
+consulta(data(1,1,2020),13,6,70).
+consulta(data(4,5,2019),14,3,25).
+consulta(data(8,8,2020),10,4,35).
+consulta(data(1,1,2020),11,6,60).
+consulta(data(18,6,2010),8,6,30).
 
 % Extensão do predicado dataValida: Data -> {V,F}
 data(Dia,Mes,Ano) :- anoValido(Ano), mesValido(Mes), diaValido(Dia,Mes).
