@@ -77,7 +77,7 @@ consulta(data(7,7,2019), 3, 2, 15).
 consulta(data(7,7,2019), 1, 2, 15).
 consulta(data(8,3,2019),5,7,30).
 consulta(data(25,4,2019),8,8,8).
-consulta(data(3,3,2023),15,5,40).
+consulta(data(3,3,2019),15,5,40).
 consulta(data(4,9,2019),12,7,50).
 consulta(data(24,12,2019),9,5,20).
 consulta(data(1,1,2020),13,6,70).
