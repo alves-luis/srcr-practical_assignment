@@ -230,9 +230,6 @@ apagarC(Data,ID,IDS,C) :- involucao(consulta(Data,ID,IDS,C)).
   consultasServico(D,S,N) :-  servico(IdS,S,_,_),
                               solucoes(Id , consulta(D,Id,IdS,_), L),
                               countElements(L,N).
-  % Extensao do predicado ganhoPorDia: Data, Valor  -> {V,F}
-  ganhoPorDia(D,T) :-  solucoes(Valor , consulta(D,_,_,Valor), L),
-                       sumElements(L,T).
 
 % Questão 5 - Identificar serviços prestados por instituição/cidade/datas/custo;
 
@@ -268,8 +265,8 @@ apagarC(Data,ID,IDS,C) :- involucao(consulta(Data,ID,IDS,C)).
   servicosPorUtente(IdU,L) :- solucoes(Desc, (consulta(_,IdU,IdS,_) , servico(IdS, Desc,_,_)), R),
                             semRepetidos(R,L).
 
-  % Extensão do predicado servicosPorUtente: Instituicao, Lista de Serviços -> {V,F}
-  % Identifica os serviços realizados por um utente
+  % Extensão do predicado servicosPorInstituição: Instituicao, Lista de Serviços -> {V,F}
+  % Identifica os serviços realizados numa instituição
   servicosPorInstituicao(Inst,L) :- solucoes(Desc, (consulta(_,IdU,IdS,_) , servico(IdS, Desc,_,_)), R),
                             semRepetidos(R,L).
 
@@ -284,6 +281,10 @@ apagarC(Data,ID,IDS,C) :- involucao(consulta(Data,ID,IDS,C)).
   % Calcula o valor gasto dado um Id de utente, serviço, uma instituição e/ou data
   custoUSID(IdU,IdS,Inst,Data,R) :- solucoes(C, (consulta(Data,IdU,IdS,C) , servico(IdS,_,Inst,_)), L) ,
                                 sumElements(L,R).
+
+  % Extensao do predicado ganhoPorDia: Data, Valor  -> {V,F}
+  ganhoPorDia(D,T) :-  solucoes(Valor , consulta(D,_,_,Valor), L),
+                    sumElements(L,T).
 
 
 % Extensão do predicado pertence: Elemento, Lista -> {V,F}
