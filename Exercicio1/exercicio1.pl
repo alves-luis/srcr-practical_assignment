@@ -220,7 +220,7 @@ apagarC(Data,ID,IDS,C) :- involucao(consulta(Data,ID,IDS,C)).
 
 
   % Extensao do predicado todosServicos: Lista de Servicos  -> {V,F}
-  todosServicos(L):- solucoes(S, servico(_,S,_,_),L).
+  todosServicos(L):- solucoes((S,I), servico(_,S,I,_),L).
 
   % Extensao do predicado consultasPorDia: Dia, Lista de Consultas  -> {V,F}
   % Identifica o par Nome de Utente, Descrição do Serviço efetuadas num dado dia.
