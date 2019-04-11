@@ -110,6 +110,12 @@ prestador( 9 , 'Diogo Teixeira' , 'Cardiologia' , 'Hospital de Faro').
 utente( 5 , 'Rui Pedro', 32 , nulo(incerto) ).
 excecao(utente(Id,Nome,Idade,Morada),nulo(incerto)) :- utente(Id,Nome,Idade,nulo(incerto)).
 
+% Generalização de conhecimento incerto sobre prestadores
+nulo(especialidade_incerta).
+nulo(instituicao_incerta).
+nulo(incerto) :- nulo(especialidade_incerta).
+nulo(incerto) :- nulo(instituicao_incerta).
+
 % Tipo 3 - Conhecimento Interdito
 % Não é possível adicionar prestadores de Homeopatia, Acupuntura e Aromaterapia
 interdito('Homeopatia').
