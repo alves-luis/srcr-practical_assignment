@@ -37,8 +37,12 @@ utente( 4 , 'Joao Miguel' , 35, 'Rua das Pereiras' ).
     Idade =< 130
 ).
 
+% Invariante Referencial
+% Não permitir a remoção de utentes que tenham cuidados associados
+-utente(Id,_,_,_) :: nao(cuidado(_,Id,_,_,_)).
+
 % Extensão do predicado prestador: Id Prestador, Nome, Especialidade, Instituição -> {V,F}
-prestador( 0 , 'Joaquim da Graça' , 'Urologia' , 'Hospital de Braga').
+prestador( 0 , 'Joaquim da Graca' , 'Urologia' , 'Hospital de Braga').
 prestador( 1 , 'Marafa da Derme' , 'Dermatologia' , 'Hospital de Braga').
 prestador( 2 , 'Manel da Costa' , 'Pediatria' , 'Hospital de Guimaraes').
 prestador( 3 , 'Serafim Peixoto' , 'Gastrenterologia' , 'Hospital da Luz').
@@ -53,40 +57,34 @@ prestador( 9 , 'Diogo Teixeira' , 'Cardiologia' , 'Hospital de Faro').
 
 % Invariante Estrutural
 % Não permitir a inserção de conhecimento positivo repetido sobre o mesmo ID
-+prestador(Id,_,_,_) :: (
-    solucoes(Id, prestador(Id,_,_,_), L),
++prestador(Id,Nome,Especialidade,Instituicao) :: (
+    solucoes(Id, prestador(Id,Nome,Especialidade,Instituicao), L),
     comprimento(L,N),
     N == 1
 ).
 
-% Invariante Estrutural
-% Uma Instituição apenas pode ter 5 prestadores, no máximo, de cada Especialidade
-% São tidos em consideração casos de especialidades/instituicoes imprecisa e incerta, que poderão
-% ser da especialidade que se deseja adicionar, causando potenciais contradições
-% na base de conhecimento.
-+prestador(_,_,Especialidade,Instituicao) :: (
-    solucoes(Id, prestador(Id,_,Especialidade,Instituicao), L),
-    comprimento(L,N),
-    N =< 5,
-    nao(excecao(prestador(Id,_,Especialidade,Instituicao), nulo(especialidade_imprecisa))),
-    nao(excecao(prestador(Id,_,_,Instituicao), nulo(especialidade_incerta))),
-    nao(excecao(prestador(Id,_,Especialidade,Instituicao), nulo(instituicao_imprecisa))),
-    nao(excecao(prestador(Id,_,Especialidade,_), nulo(instituicao_incerta)))
-).
+% Extensão do predicado cuidado: Data, Id Utente, Id Prestador, Descrição, Custo -> {V,F}
+cuidado( data(5,10,2018) , 0 , 'Consulta ao Coracao' , 20).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Conhecimento Perfeito Negativo
 
 % É mentira que os utentes que fazem parte da base de conhecimento
 % tenham parâmetros diferentes do que os que estão guardados
--utente( Id , Nome , Idade , Morada) :- utente(Id,_,_,_) , nao(utente( Id , Nome , Idade , Morada)).
+-utente( Id , Nome , Idade , Morada) :- utente(Id,_,_,_) ,
+                                      nao(utente(Id,Nome,Idade,Morada)),
+                                      nao(utente(Id,nulo(incerto),Idade,Morada)),
+                                      nao(utente(Id,Nome,nulo(incerto),Morada)),
+                                      nao(utente(Id,Nome,Idade,nulo(incerto))).
 
 % É mentira que os prestadores que fazem parte da base de conhecimento tenham
 % um nome diferente do que o que lhes foi associado
--prestador( Id , Nome , _ , _) :- prestador(Id,_,_,_) , nao(prestador(Id,Nome,_,_)).
+-prestador( Id , Nome , _ , _) :- prestador(Id,_,_,_) ,
+                                nao(prestador(Id,Nome,_,_)),
+                                nao(prestador(Id,nulo(incerto),_,_)).
 
 % O Joaquim da Graça não presta Urologia no Hospital de Guimarães
--prestador( 0 , 'Joaquim da Graça' , 'Urologia' , 'Hospital de Guimaraes').
+-prestador( 0 , 'Joaquim da Graca' , 'Urologia' , 'Hospital de Guimaraes').
 
 % O Miguel Dourado não presta Gastrenterologia em lado algum
 -prestador( 4 , 'Miguel Dourado' , 'Gastrenterologia', Instituicao).
@@ -106,15 +104,19 @@ prestador( 9 , 'Diogo Teixeira' , 'Cardiologia' , 'Hospital de Faro').
 % Conhecimento Imperfeito
 
 % Tipo 1 - Conhecimento Incerto
+
 % Não se sabe a morada do utente Rui Pedro, apesar de se saber a sua idade.
 utente( 5 , 'Rui Pedro', 32 , nulo(incerto) ).
-excecao(utente(Id,Nome,Idade,Morada),nulo(incerto)) :- utente(Id,Nome,Idade,nulo(incerto)).
+excecao(utente(Id,Nome,Idade,Morada)) :- utente(Id,Nome,Idade,nulo(incerto)).
 
-% Generalização de conhecimento incerto sobre prestadores
-nulo(especialidade_incerta).
-nulo(instituicao_incerta).
-nulo(incerto) :- nulo(especialidade_incerta).
-nulo(incerto) :- nulo(instituicao_incerta).
+% Não se sabe qual a especialidade que o Hugo Anibal presta, uma vez que
+% não foi preenchido o formulário 37423_B aquando da sua entrada a serviço
+% no hospital
+prestador( 10 , 'Hugo Anibal' , nulo(incerto) , 'Hospital da Luz').
+excecao(prestador(Id,Nome,Especialidade,Instituicao)) :- prestador(Id,Nome,nulo(incerto), Instituicao).
+
+
+% Tipo 2 - Conhecimento Impreciso
 
 % Tipo 3 - Conhecimento Interdito
 % Não é possível adicionar prestadores de Homeopatia, Acupuntura e Aromaterapia
@@ -127,7 +129,7 @@ interdito('Aromaterapia').
 +prestador(Id,Nome,Especialidade,Instituicao) :: (nao(interdito(Especialidade))).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-
+% Evolução do conhecimento
 evolucao( Termo ) :-
     solucoes( Invariante,+Termo::Invariante,Lista ),
     insercao( Termo ),
@@ -162,14 +164,18 @@ si( Questao,verdadeiro ) :-
     Questao.
 si( Questao,falso ) :-
     -Questao.
-si( Questao,incerto ) :-
-    nao(Questao),
-    nao(-Questao),
-    excecao(Questao,nulo(incerto)).
 si( Questao,impreciso ) :-
     nao(Questao),
     nao(-Questao),
-    excecao(Questao,nulo(impreciso)).
+    solucoes(Excecoes, excecao(Questao), L),
+    comprimento(L,N),
+    N > 1.
+si( Questao,incerto ) :-
+    nao(Questao),
+    nao(-Questao),
+    solucoes(Excecoes, excecao(Questao), L),
+    comprimento(L,N),
+    N == 1.
 si( Questao,desconhecido ) :-
     nao( Questao ),
     nao( -Questao ),
@@ -192,3 +198,30 @@ solucoes( X,Y,Z ) :-
 % comprimento. comprimento: Lista, Tamanho -> {V,F}
 comprimento( [],0 ).
 comprimento( [H|T],N ) :- comprimento(T,M), N is M+1.
+
+% Extensão do predicado pertence: Elemento, Lista -> {V,F}
+pertence(X, [X|T]).
+pertence(X, [H|T]) :-  nao(X == H), pertence(X, T).
+
+% Extensão do predicado dataValida: Data -> {V,F}
+data(Dia,Mes,Ano) :- anoValido(Ano), mesValido(Mes), diaValido(Dia,Mes).
+
+% Extensão do predicado natural: Num -> {V,F}
+natural(1).
+natural(N) :- N > 1, M is N-1, natural(M).
+
+% Extensão do predicado anoValido: Ano -> {V,F}
+anoValido(Ano) :- natural(Ano), Ano > 1890 , Ano < 2020.
+
+% Extensão do predicado mesValido: Mes -> {V,F}
+mesValido(Mes) :- natural(Mes), Mes < 13.
+
+% Extensão do predicado diaValido: Dia, Mes, Ano -> {V,F}
+diaValido(Dia,Mes) :- pertence(Mes,[1,3,5,7,8,10,12]),
+                       natural(Dia),
+                       Dia < 32.
+diaValido(Dia,Mes) :- pertence(Mes,[4,6,9,11]),
+                         natural(Dia),
+                         Dia < 31.
+% Ninguém gosta de bissextos
+diaValido(Dia,2) :- natural(Dia), Dia < 29.
