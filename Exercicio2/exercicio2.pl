@@ -77,11 +77,32 @@ cuidado( data(5,10,2018) , 0 , 'Consulta ao Coracao' , 20).
                                       nao(utente(Id,Nome,nulo(incerto),Morada)),
                                       nao(utente(Id,Nome,Idade,nulo(incerto))).
 
+
+% Um utente registado tem uma idade incerta mas sabemos que não 70 anos
+
+utente( 5,'Joaquina',idade_desconhecida,'Av.da Liberdade','Lisboa','933000534').
+-utente( 19,'Joaquina',70,'Av.da Liberdade','Lisboa','933000534').
+
+% É mentira que os cuidados que fazem parte da base de conhecimento
+% tenham parâmetros diferentes do que os que estão guardados
+-cuidado( Data, IdUtente, IdPrestador,Descrição, Custo) :- cuidado(_,IdUtente,IdPrestador,_,_) ,
+                                      nao(cuidado( Data, IdUtente, IdPrestador,Descrição, Custo)),
+                                      nao(cuidado( nulo(incerto), IdUtente, IdPrestador,Descrição, Custo)),
+                                      nao(cuidado(Data, IdUtente, IdPrestador,Descrição, nulo(incerto) )),
+                                      nao(cuidado( Data, IdUtente, IdPrestador,nulo(incerto), Custo))).
+
+% Sabe-se que o custo do cuidado não foi de 40
+-(cuidado(data(19,3,2019), 1, 3,'Consulta breve', 40)).
+
 % É mentira que os prestadores que fazem parte da base de conhecimento tenham
 % um nome diferente do que o que lhes foi associado
 -prestador( Id , Nome , _ , _) :- prestador(Id,_,_,_) ,
                                 nao(prestador(Id,Nome,_,_)),
                                 nao(prestador(Id,nulo(incerto),_,_)).
+
+% O Andre Goncalves não presta Urologia no Hospital de Guimarães
+-prestador( 0 , 'Joaquim da Graca' , 'Urologia' , 'Hospital de Guimaraes').
+
 
 % O Joaquim da Graça não presta Urologia no Hospital de Guimarães
 -prestador( 0 , 'Joaquim da Graca' , 'Urologia' , 'Hospital de Guimaraes').
@@ -105,18 +126,60 @@ cuidado( data(5,10,2018) , 0 , 'Consulta ao Coracao' , 20).
 
 % Tipo 1 - Conhecimento Incerto
 
+% Não se sabe o nome do utente
+utente( 6 , nulo(incerto), 30 , 'Rua dos Pomares' ).
+excecao(utente(Id,Nome,Idade,Morada)) :- utente(Id,nulo(incerto),Idade,Morada).
+
 % Não se sabe a morada do utente Rui Pedro, apesar de se saber a sua idade.
-utente( 5 , 'Rui Pedro', 32 , nulo(incerto) ).
+utente( 7 , 'Rui Pedro', 32 , nulo(incerto) ).
 excecao(utente(Id,Nome,Idade,Morada)) :- utente(Id,Nome,Idade,nulo(incerto)).
 
+% Não se sabe a idade do utente
+utente( 8 , 'Jorge', nulo(incerto) , 'Rua Pinheiral' ).
+excecao(utente(Id,Nome,Idade,Morada)) :- utente(Id,Nome,nulo(incerto),Morada).
+
 % Não se sabe qual a especialidade que o Hugo Anibal presta, uma vez que
-% não foi preenchido o formulário 37423_B aquando da sua entrada a serviço
+% não foi preenchido o formulário 37423_B aquando da sua entrada a prestador
 % no hospital
 prestador( 10 , 'Hugo Anibal' , nulo(incerto) , 'Hospital da Luz').
 excecao(prestador(Id,Nome,Especialidade,Instituicao)) :- prestador(Id,Nome,nulo(incerto), Instituicao).
 
+% Não se sabe qual o hospital em que o Andre presta cuidado
+prestador( 11 , 'Andre' , 'Genecologia' , nulo(incerto)).
+excecao(prestador(Id,Nome,Especialidade,Instituicao)) :- prestador(Id,Nome,nulo(incerto), Instituicao).
+
+% Não se sabe qual a data em que o cuidado foi prestado
+cuidado(nulo(incerto),4,6,'Consulta breve',30).
+excecao(cuidado( Data, IdUtente, Id Prestador,Descrição, Custo)):- cuidado(nulo(incerto), IdUtente, Id Prestador,Descrição, Custo)
+
+% Não se sabe qual o custo do cuidado que foi prestado
+cuidado((data(7,9,2019),4,6,'Consulta breve',nulo(incerto)).
+excecao(cuidado( Data, IdUtente, Id Prestador,Descrição, Custo)):- cuidado(Data, IdUtente, Id Prestador,Descrição, nulo(incerto))
 
 % Tipo 2 - Conhecimento Impreciso
+
+% um cuidado pode ter custado 40 ou 60 euros
+excecao(cuidado(data(10,7,2019), 3, 2,'Consulta breve', 40)).
+excecao(cuidado(data(10,7,2019), 3, 2,'Consulta breve', 60)).
+
+
+% um cuidado pode ter sido prestado pelo Dr.João ou pelo Dr.Alberto
+excecao(prestador( 10 , 'João Teixeira' , 'Cardiologia' , 'Hospital de Faro')).
+excecao(prestador( 10 , 'Alberto Ricardo' , 'Cardiologia' , 'Hospital de Faro')).
+
+% um medico pode ter prestado cuidados em dois hospitais distintos
+excecao(cuidado_prestado( 13,'Pediatria','Hospital Privado do Algarve','Faro')).
+excecao(cuidado_prestado( 13,'Pediatria','Hospital de Faro','Faro')).
+
+% um utente com o mesmo ID pode estar registado com diferentes nomes do seu nome completo
+excecao(utente( 15 , 'Joao Miguel' , 35, 'Rua das Amoreiras' )).
+excecao(utente( 15 , 'Joao Miguel Abreu' , 35, 'Rua das Amoreiras' )).
+
+% O utente com o id nº20 tem uma idade compreendida entre 18 e 23
+excecao(utente( 20,'Alexandra',C,'Avenida 25 de Abril','Santarém','935694789')) :- C >= 18 , C =< 25.
+excecao(utente( 16 , 'Miguel Joao' , I, 'Rua Casal Garcia ' )) :- I >= 18 , I =< 23.
+
+
 
 % Tipo 3 - Conhecimento Interdito
 % Não é possível adicionar prestadores de Homeopatia, Acupuntura e Aromaterapia
@@ -127,6 +190,17 @@ interdito('Aromaterapia').
 % Invariante estrutural
 % Não é possível adicionar prestadores de Especialidades interditas.
 +prestador(Id,Nome,Especialidade,Instituicao) :: (nao(interdito(Especialidade))).
+
+% cuidado do dia 17-04-2019 tem um utente que ninguém pode conhecer
+interdito('3').
+cuidado(data(17,04,2019), interdito, 2, 60).
+
+
+% Invariante estrutural
+% Não é possível adicionar ID utente de determinado cuidado.
++cuidado( Data, IdUtente, IdPrestador, Custo) :: (nao(interdito(IdUtente))).
+
+
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Evolução do conhecimento
