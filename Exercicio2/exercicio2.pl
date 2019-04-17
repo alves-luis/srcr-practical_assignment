@@ -64,7 +64,22 @@ prestador( 9 , 'Diogo Teixeira' , 'Cardiologia' , 'Hospital de Faro').
 ).
 
 % Extensão do predicado cuidado: Data, Id Utente, Id Prestador, Descrição, Custo -> {V,F}
-cuidado( data(5,10,2018) , 0 , 'Consulta ao Coracao' , 20).
+cuidado( data(5,10,2018) , 0, 1 , 'cuidado ao Coracao' , 20).
+cuidado(data(19,3,2019), 1, 2,'cuidado pediatrico' , 25).
+cuidado(data(23,4,2019), 2, 1,'cuidado demartologico' , 3).
+cuidado(data(3,3,2019), 1, 3,'cuidado ao Coracao' , 33).
+cuidado(data(7,7,2019), 3, 2,'cuidado pediatrico' , 15).
+cuidado(data(7,7,2019), 1, 2,'cuidado pediatrico' , 15).
+cuidado(data(8,3,2019),5,7,'cuidado ao Coracao' ,30).
+cuidado(data(25,4,2019),4,8,'cuidado ao Coracao' ,8).
+cuidado(data(3,3,2019),4,5,'cuidado ao Coracao' ,40).
+cuidado(data(4,9,2019),1,7,'cuidado ao Coracao' ,50).
+cuidado(data(24,12,2019),0,5,'cuidado ao Coracao' ,20).
+cuidado(data(1,1,2020),1,1,'cuidado demartologico' ,70).
+cuidado(data(4,5,2019),4,1,'cuidado demartologico' ,25).
+cuidado(data(8,8,2020),1,4,'cuidado ao Coracao' ,35).
+cuidado(data(1,1,2020),1,6,'cuidado ao Coracao' ,60).
+cuidado(data(18,6,2010),3,6,'cuidado ao Coracao' ,30).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Conhecimento Perfeito Negativo
