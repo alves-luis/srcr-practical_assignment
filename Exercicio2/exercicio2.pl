@@ -207,8 +207,8 @@ excecao(prestador( 10 , 'João Teixeira' , 'Cardiologia' , 'Hospital de Faro')).
 excecao(prestador( 10 , 'Alberto Ricardo' , 'Cardiologia' , 'Hospital de Faro')).
 
 % um medico pode ter prestado cuidados em dois hospitais distintos
-excecao(cuidado_prestado( 13,'Pediatria','Hospital Privado do Algarve','Faro')).
-excecao(cuidado_prestado( 13,'Pediatria','Hospital de Faro','Faro')).
+excecao(prestador( 13,'Pediatria','Hospital Privado do Algarve','Faro')).
+excecao(prestador( 13,'Pediatria','Hospital de Faro','Faro')).
 
 % um utente com o mesmo ID pode estar registado com diferentes nomes do seu nome completo
 excecao(utente( 15 , 'Joao Miguel' , 35, 'Rua das Amoreiras' )).
