@@ -81,6 +81,30 @@ cuidado(data(8,8,2020),1,4,'cuidado ao Coracao' ,35).
 cuidado(data(1,1,2020),1,6,'cuidado ao Coracao' ,60).
 cuidado(data(18,6,2010),3,6,'cuidado ao Coracao' ,30).
 
+% Invariante estrutural
+% Não permitir a inserção de conhecimento repetido de cuidados
++cuidado(Data,IdU,IdS,Descrição,Custo) :: (solucoes(Ls, cuidado(Data,IdU,IdS,Descrição,Custo),S),
+                                  countElements(S,N),
+                                  N == 1).
+% Invariante estrutural
+% Não permitir a inserção de conhecimento em que o Custo é inferior a 0
++cuidado(Data,IdU,IdS,Descrição,Custo) :: Custo > 0.
+
+% Invariante referencial
+% Não permitir a inserção de novos cuidados se não existir o utente com
+% esse Id
++cuidado(_,IdU,_,_,_) :: utente(IdU,_,_,_).
+
+% Invariante referencial
+% Não permitir a inserção de novos cuidados se não existir o prestador
+% com esse Id
++cuidado(_,_,IdS,_,_) :: prestador(IdS,_,_,_).
+
+% Invariante referencial
+% Não permitir a inserção de novos cuidados se a data não for válida
++cuidado(data(Dia,Mes,Ano),_,_,_,_) :: data(Dia,Mes,Ano).
+
+
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Conhecimento Perfeito Negativo
 
