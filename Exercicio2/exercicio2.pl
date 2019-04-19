@@ -21,6 +21,9 @@ utente( 1 , 'Rafaela Rodrigues' , 20 , 'Rua das Nespereiras').
 utente( 2 , 'Andre Goncalves' , 20 , 'Rua dos Pessegueiros').
 utente( 3 , 'Joao Queiros' , 20 , 'Rua das Laranjeiras').
 utente( 4 , 'Joao Miguel' , 35, 'Rua das Pereiras' ).
+% um utente com o mesmo ID pode estar registado com diferentes nomes do seu nome completo
+utente( 15 , 'Joao Miguel' , 35, 'Rua das Amoreiras' ).
+utente( 15 , 'Joao Miguel Abreu' , 35, 'Rua das Amoreiras' ).
 
 % Invariante Estrutural
 % Não permitir a inserção de conhecimento positivo repetido sobre o mesmo ID
@@ -29,6 +32,15 @@ utente( 4 , 'Joao Miguel' , 35, 'Rua das Pereiras' ).
     comprimento(L,N),
     N == 1
 ).
+
+% Não permitir a inserção de utentes caso seja interdito adicionar a idade
++utente(Id,Nome,Idade,Morada) :: nao(utente(Id,Nome,nulo(interdito),Morada)).
+
+% Não permitir a inserção de utentes caso seja interdito adicionar o nome
++utente(Id,Nome,Idade,Morada) :: nao(utente(Id,nulo(interdito),Idade,Morada)).
+
+% Não permitir a inserção de utentes caso seja interdito adicionar a morada
++utente(Id,Nome,Idade,Morada) :: nao(utente(Id,Nome,Idade,nulo(interdito))).
 
 % Invariante Referencial
 % Não permitir a remoção de utentes que tenham cuidados associados
@@ -180,16 +192,11 @@ excecao(cuidado(data(10,7,2019), 3, 2,'Consulta breve', 60)).
 excecao(prestador( 13 , 'Joao Teixeira' , 'Cardiologia' , 'Hospital de Faro')).
 excecao(prestador( 13 , 'Alberto Ricardo' , 'Cardiologia' , 'Hospital de Faro')).
 
-% um utente com o mesmo ID pode estar registado com diferentes nomes do seu nome completo
-excecao(utente( 15 , 'Joao Miguel' , 35, 'Rua das Amoreiras' )).
-excecao(utente( 15 , 'Joao Miguel Abreu' , 35, 'Rua das Amoreiras' )).
-
 % O utente com o id nº20 tem uma idade compreendida entre 18 e 23
 excecao(utente( 20,'Alexandra',C,'Avenida 25 de Abril','Santarém','935694789')) :- C >= 18 , C =< 25.
 excecao(utente( 16 , 'Miguel Joao' , I, 'Rua Casal Garcia ' )) :- I >= 18 , I =< 23.
 
-
-
+% -------------------------------
 % Tipo 3 - Conhecimento Interdito
 % Não é possível adicionar prestadores de Homeopatia, Acupuntura e Aromaterapia
 interdito('Homeopatia').
@@ -203,7 +210,6 @@ interdito('Aromaterapia').
 % cuidado do dia 17-04-2019 tem um utente que ninguém pode conhecer
 cuidado(data(17,04,2019), nulo(interdito), 2, 60).
 
-
 interdito(3).
 % Invariante estrutural
 % Não é possível adicionar ID utente de determinado cuidado.
@@ -215,6 +221,21 @@ evolucao( Termo ) :-
     solucoes( Invariante,+Termo::Invariante,Lista ),
     insercao( Termo ),
     teste( Lista ).
+
+utentePerfeito(Id,Nome,Idade,Morada) :- nao(Nome == nulo(impreciso)),
+                                        nao(Idade == nulo(impreciso)),
+                                        nao(Morada == nulo(impreciso)),
+                                        nao(Id == nulo(impreciso)).
+
+% THIS BELOW IS A WORK IN PROGRESS
+removeImpreciso(utente(Id,Nome,Idade,Morada)) :-
+    retract(utente(Id,_,_,_)).
+
+evolucaoUtente(utente(Id,Nome,Idade,Morada)) :-
+    utentePerfeito(Id,Nome,Idade,Morada),
+    solucoes(Invariante, +utente(Id,Nome,Idade,Morada)::Invariante, Lista),
+    testa(Lista),
+    removeImpreciso(utente(Id,Nome,Idade,Morada)).
 
 insercao( Termo ) :-
     assert( Termo ).
