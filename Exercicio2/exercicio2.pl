@@ -79,9 +79,6 @@ cuidado(data(18,6,2010),3,6,'cuidado ao Coracao' ,30).
 +cuidado(Data,IdU,IdS,Descricao,Custo) :: (solucoes(Ls, cuidado(Data,IdU,IdS,Descricao,Custo),S),
                                   comprimento(S,N),
                                   N == 1).
-% Invariante estrutural
-% Não permitir a inserção de conhecimento em que o Custo é inferior a 0
-+cuidado(Data,IdU,IdS,Descricao,Custo) :: Custo > 0.
 
 % Invariante referencial
 % Não permitir a inserção de novos cuidados se não existir o utente com
@@ -100,9 +97,7 @@ cuidado(data(18,6,2010),3,6,'cuidado ao Coracao' ,30).
 % tenham parâmetros diferentes do que os que estão guardados
 -utente( Id , Nome , Idade , Morada) :- utente(Id,_,_,_) ,
                                       nao(utente(Id,Nome,Idade,Morada)),
-                                      nao(utente(Id,nulo(incerto),Idade,Morada)),
-                                      nao(utente(Id,Nome,nulo(incerto),Morada)),
-                                      nao(utente(Id,Nome,Idade,nulo(incerto))).
+                                      nao(excecao(utente(Id,Nome,Idade,Morada))).
 
 
 % Um utente registado tem uma idade incerta mas sabemos que não são 70 anos
@@ -113,22 +108,16 @@ utente( 5,'Joaquina',nulo(incerto),'Av.da Liberdade, Lisboa').
 % tenham parâmetros diferentes do que os que estão guardados
 -cuidado( Data, IdUtente, IdPrestador,Descricao, Custo) :- cuidado(_,IdUtente,IdPrestador,_,_) ,
                                       nao(cuidado( Data, IdUtente, IdPrestador,Descricao, Custo)),
-                                      nao(cuidado( nulo(incerto), IdUtente, IdPrestador,Descricao, Custo)),
-                                      nao(cuidado(Data, IdUtente, IdPrestador,Descricao, nulo(incerto) )),
-                                      nao(cuidado( Data, IdUtente, IdPrestador,nulo(incerto), Custo)).
+                                      nao(excecao(cuidado(Data,IdUtente,IdPrestador,Descricao,Custo))).
 
 % Sabe-se que o custo do cuidado não foi de 40
--(cuidado(data(19,3,2019), 1, 3,'Consulta breve', 40)).
+-cuidado(data(19,3,2019), 1, 3,'Consulta breve', 40).
 
 % É mentira que os prestadores que fazem parte da base de conhecimento tenham
 % um nome diferente do que o que lhes foi associado
 -prestador( Id , Nome , _ , _) :- prestador(Id,_,_,_) ,
                                 nao(prestador(Id,Nome,_,_)),
-                                nao(prestador(Id,nulo(incerto),_,_)).
-
-% O Andre Goncalves não presta Urologia no Hospital de Guimarães
--prestador( 0 , 'Joaquim da Graca' , 'Urologia' , 'Hospital de Guimaraes').
-
+                                nao(excecao(prestador(Id,Nome,_,_))).
 
 % O Joaquim da Graça não presta Urologia no Hospital de Guimarães
 -prestador( 0 , 'Joaquim da Graca' , 'Urologia' , 'Hospital de Guimaraes').
@@ -145,7 +134,6 @@ utente( 5,'Joaquina',nulo(incerto),'Av.da Liberdade, Lisboa').
     nao(Instituicao == 'Hospital de Braga').
 -prestador( 1 , 'Marafa da Derme' , Especialidade , _ ) :-
     nao(Especialidade == 'Dermatologia').
-
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Conhecimento Imperfeito
@@ -183,8 +171,7 @@ cuidado((data(7,9,2019),4,6,'Consulta breve',nulo(incerto))).
 excecao(cuidado( Data, IdUtente, IdPrestador,Descricao, Custo)):- cuidado(Data, IdUtente, IdPrestador,Descricao, nulo(incerto)).
 
 % Tipo 2 - Conhecimento Impreciso
-
-% um cuidado pode ter custado 40 ou 60 euros
+% Um cuidado pode ter custado 40 ou 60 euros
 excecao(cuidado(data(10,7,2019), 3, 2,'Consulta breve', 40)).
 excecao(cuidado(data(10,7,2019), 3, 2,'Consulta breve', 60)).
 
@@ -225,8 +212,6 @@ cuidado(data(17,04,2019), interdito, 2, 60).
 % Invariante estrutural
 % Não é possível adicionar ID utente de determinado cuidado.
 +cuidado( Data, IdUtente, IdPrestador, Custo) :: (nao(interdito(IdUtente))).
-
-
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Evolução do conhecimento
