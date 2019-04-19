@@ -95,8 +95,7 @@ cuidado(data(18,6,2010),3,6,'cuidado ao Coracao' ,30).
 
 % É mentira que os utentes que fazem parte da base de conhecimento
 % tenham parâmetros diferentes do que os que estão guardados
--utente( Id , Nome , Idade , Morada) :- utente(Id,_,_,_) ,
-                                      nao(utente(Id,Nome,Idade,Morada)),
+-utente( Id , Nome , Idade , Morada) :- nao(utente(Id,Nome,Idade,Morada)),
                                       nao(excecao(utente(Id,Nome,Idade,Morada))).
 
 
@@ -106,18 +105,16 @@ utente( 5,'Joaquina',nulo(incerto),'Av.da Liberdade, Lisboa').
 
 % É mentira que os cuidados que fazem parte da base de conhecimento
 % tenham parâmetros diferentes do que os que estão guardados
--cuidado( Data, IdUtente, IdPrestador,Descricao, Custo) :- cuidado(_,IdUtente,IdPrestador,_,_) ,
-                                      nao(cuidado( Data, IdUtente, IdPrestador,Descricao, Custo)),
-                                      nao(excecao(cuidado(Data,IdUtente,IdPrestador,Descricao,Custo))).
+-cuidado( Data, IdUtente, IdPrestador,Descricao, Custo) :- nao(cuidado( Data, IdUtente, IdPrestador,Descricao, Custo)),
+                                                          nao(excecao(cuidado(Data,IdUtente,IdPrestador,Descricao,Custo))).
 
 % Sabe-se que o custo do cuidado não foi de 40
 -cuidado(data(19,3,2019), 1, 3,'Consulta breve', 40).
 
 % É mentira que os prestadores que fazem parte da base de conhecimento tenham
 % um nome diferente do que o que lhes foi associado
--prestador( Id , Nome , _ , _) :- prestador(Id,_,_,_) ,
-                                nao(prestador(Id,Nome,_,_)),
-                                nao(excecao(prestador(Id,Nome,_,_))).
+-prestador( Id , Nome , Esp , Inst) :- nao(prestador(Id,Nome,Esp,Inst)),
+                                       nao(excecao(prestador(Id,Nome,Esp, Inst))).
 
 % O Joaquim da Graça não presta Urologia no Hospital de Guimarães
 -prestador( 0 , 'Joaquim da Graca' , 'Urologia' , 'Hospital de Guimaraes').
@@ -168,17 +165,20 @@ excecao(cuidado( Data, IdUtente, IdPrestador,Descricao, Custo)) :- cuidado(nulo(
 
 % Não se sabe qual o custo do cuidado que foi prestado
 cuidado((data(7,9,2019),4,6,'Consulta breve',nulo(incerto))).
-excecao(cuidado( Data, IdUtente, IdPrestador,Descricao, Custo)):- cuidado(Data, IdUtente, IdPrestador,Descricao, nulo(incerto)).
+excecao(cuidado( Data, IdUtente, IdPrestador,Descricao, Custo)) :- cuidado(Data, IdUtente, IdPrestador,Descricao, nulo(incerto)).
 
+% -------------------------------
 % Tipo 2 - Conhecimento Impreciso
+
 % Um cuidado pode ter custado 40 ou 60 euros
 excecao(cuidado(data(10,7,2019), 3, 2,'Consulta breve', 40)).
 excecao(cuidado(data(10,7,2019), 3, 2,'Consulta breve', 60)).
 
-
-% um cuidado pode ter sido prestado pelo Dr.João ou pelo Dr.Alberto
-excecao(prestador( 10 , 'João Teixeira' , 'Cardiologia' , 'Hospital de Faro')).
-excecao(prestador( 10 , 'Alberto Ricardo' , 'Cardiologia' , 'Hospital de Faro')).
+% Quando o prestador com o ID 13 foi registado, não foi registado o seu nome.
+% Posteriormente foi adicionado que poderia ser João Teixeira, ou Alberto Ricardo,
+% uma vez que foram encontradas assinaturas com estes dois nomes em vários papéis.
+excecao(prestador( 13 , 'Joao Teixeira' , 'Cardiologia' , 'Hospital de Faro')).
+excecao(prestador( 13 , 'Alberto Ricardo' , 'Cardiologia' , 'Hospital de Faro')).
 
 % um medico pode ter prestado cuidados em dois hospitais distintos
 excecao(prestador( 13,'Pediatria','Hospital Privado do Algarve','Faro')).
@@ -205,10 +205,10 @@ interdito('Aromaterapia').
 +prestador(Id,Nome,Especialidade,Instituicao) :: (nao(interdito(Especialidade))).
 
 % cuidado do dia 17-04-2019 tem um utente que ninguém pode conhecer
-interdito('3').
-cuidado(data(17,04,2019), interdito, 2, 60).
+cuidado(data(17,04,2019), nulo(interdito), 2, 60).
 
 
+interdito(3).
 % Invariante estrutural
 % Não é possível adicionar ID utente de determinado cuidado.
 +cuidado( Data, IdUtente, IdPrestador, Custo) :: (nao(interdito(IdUtente))).
@@ -249,18 +249,6 @@ si( Questao,verdadeiro ) :-
     Questao.
 si( Questao,falso ) :-
     -Questao.
-si( Questao,impreciso ) :-
-    nao(Questao),
-    nao(-Questao),
-    solucoes(Excecoes, excecao(Questao), L),
-    comprimento(L,N),
-    N > 1.
-si( Questao,incerto ) :-
-    nao(Questao),
-    nao(-Questao),
-    solucoes(Excecoes, excecao(Questao), L),
-    comprimento(L,N),
-    N == 1.
 si( Questao,desconhecido ) :-
     nao( Questao ),
     nao( -Questao ).
