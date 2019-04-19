@@ -24,17 +24,10 @@ utente( 4 , 'Joao Miguel' , 35, 'Rua das Pereiras' ).
 
 % Invariante Estrutural
 % Não permitir a inserção de conhecimento positivo repetido sobre o mesmo ID
-+utente(Id,_,_,_) :: (
-    solucoes(Ids, utente(Id,_,_,_),L),
++utente(Id,Nome,Idade,Morada) :: (
+    solucoes(Id, utente(Id,Nome,Idade,Morada),L),
     comprimento(L,N),
     N == 1
-).
-
-% Invariante Estrutural
-% Não permitir a inserção de utentes com idades inferiores a 0 e superiores a 130
-+utente(_,_,Idade,_) :: (
-    Idade >= 0,
-    Idade =< 130
 ).
 
 % Invariante Referencial
@@ -64,7 +57,7 @@ prestador( 9 , 'Diogo Teixeira' , 'Cardiologia' , 'Hospital de Faro').
 ).
 
 % Extensão do predicado cuidado: Data, Id Utente, Id Prestador, Descrição, Custo -> {V,F}
-cuidado( data(5,10,2018) , 0, 1 , 'cuidado ao Coracao' , 20).
+cuidado(data(5,10,2018) , 0, 1 , 'cuidado ao Coracao' , 20).
 cuidado(data(19,3,2019), 1, 2,'cuidado pediatrico' , 25).
 cuidado(data(23,4,2019), 2, 1,'cuidado demartologico' , 3).
 cuidado(data(3,3,2019), 1, 3,'cuidado ao Coracao' , 33).
@@ -83,12 +76,12 @@ cuidado(data(18,6,2010),3,6,'cuidado ao Coracao' ,30).
 
 % Invariante estrutural
 % Não permitir a inserção de conhecimento repetido de cuidados
-+cuidado(Data,IdU,IdS,Descrição,Custo) :: (solucoes(Ls, cuidado(Data,IdU,IdS,Descrição,Custo),S),
-                                  countElements(S,N),
++cuidado(Data,IdU,IdS,Descricao,Custo) :: (solucoes(Ls, cuidado(Data,IdU,IdS,Descricao,Custo),S),
+                                  comprimento(S,N),
                                   N == 1).
 % Invariante estrutural
 % Não permitir a inserção de conhecimento em que o Custo é inferior a 0
-+cuidado(Data,IdU,IdS,Descrição,Custo) :: Custo > 0.
++cuidado(Data,IdU,IdS,Descricao,Custo) :: Custo > 0.
 
 % Invariante referencial
 % Não permitir a inserção de novos cuidados se não existir o utente com
@@ -99,11 +92,6 @@ cuidado(data(18,6,2010),3,6,'cuidado ao Coracao' ,30).
 % Não permitir a inserção de novos cuidados se não existir o prestador
 % com esse Id
 +cuidado(_,_,IdS,_,_) :: prestador(IdS,_,_,_).
-
-% Invariante referencial
-% Não permitir a inserção de novos cuidados se a data não for válida
-+cuidado(data(Dia,Mes,Ano),_,_,_,_) :: data(Dia,Mes,Ano).
-
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Conhecimento Perfeito Negativo
@@ -117,18 +105,17 @@ cuidado(data(18,6,2010),3,6,'cuidado ao Coracao' ,30).
                                       nao(utente(Id,Nome,Idade,nulo(incerto))).
 
 
-% Um utente registado tem uma idade incerta mas sabemos que não 70 anos
-
-utente( 5,'Joaquina',idade_desconhecida,'Av.da Liberdade','Lisboa','933000534').
--utente( 19,'Joaquina',70,'Av.da Liberdade','Lisboa','933000534').
+% Um utente registado tem uma idade incerta mas sabemos que não são 70 anos
+utente( 5,'Joaquina',nulo(incerto),'Av.da Liberdade, Lisboa').
+-utente( 5,'Joaquina',70,'Av.da Liberdade, Lisboa').
 
 % É mentira que os cuidados que fazem parte da base de conhecimento
 % tenham parâmetros diferentes do que os que estão guardados
--cuidado( Data, IdUtente, IdPrestador,Descrição, Custo) :- cuidado(_,IdUtente,IdPrestador,_,_) ,
-                                      nao(cuidado( Data, IdUtente, IdPrestador,Descrição, Custo)),
-                                      nao(cuidado( nulo(incerto), IdUtente, IdPrestador,Descrição, Custo)),
-                                      nao(cuidado(Data, IdUtente, IdPrestador,Descrição, nulo(incerto) )),
-                                      nao(cuidado( Data, IdUtente, IdPrestador,nulo(incerto), Custo))).
+-cuidado( Data, IdUtente, IdPrestador,Descricao, Custo) :- cuidado(_,IdUtente,IdPrestador,_,_) ,
+                                      nao(cuidado( Data, IdUtente, IdPrestador,Descricao, Custo)),
+                                      nao(cuidado( nulo(incerto), IdUtente, IdPrestador,Descricao, Custo)),
+                                      nao(cuidado(Data, IdUtente, IdPrestador,Descricao, nulo(incerto) )),
+                                      nao(cuidado( Data, IdUtente, IdPrestador,nulo(incerto), Custo)).
 
 % Sabe-se que o custo do cuidado não foi de 40
 -(cuidado(data(19,3,2019), 1, 3,'Consulta breve', 40)).
@@ -189,11 +176,11 @@ excecao(prestador(Id,Nome,Especialidade,Instituicao)) :- prestador(Id,Nome,nulo(
 
 % Não se sabe qual a data em que o cuidado foi prestado
 cuidado(nulo(incerto),4,6,'Consulta breve',30).
-excecao(cuidado( Data, IdUtente, Id Prestador,Descrição, Custo)):- cuidado(nulo(incerto), IdUtente, Id Prestador,Descrição, Custo)
+excecao(cuidado( Data, IdUtente, IdPrestador,Descricao, Custo)) :- cuidado(nulo(incerto), IdUtente, IdPrestador,Descricao, Custo).
 
 % Não se sabe qual o custo do cuidado que foi prestado
-cuidado((data(7,9,2019),4,6,'Consulta breve',nulo(incerto)).
-excecao(cuidado( Data, IdUtente, Id Prestador,Descrição, Custo)):- cuidado(Data, IdUtente, Id Prestador,Descrição, nulo(incerto))
+cuidado((data(7,9,2019),4,6,'Consulta breve',nulo(incerto))).
+excecao(cuidado( Data, IdUtente, IdPrestador,Descricao, Custo)):- cuidado(Data, IdUtente, IdPrestador,Descricao, nulo(incerto)).
 
 % Tipo 2 - Conhecimento Impreciso
 
@@ -291,9 +278,7 @@ si( Questao,incerto ) :-
     N == 1.
 si( Questao,desconhecido ) :-
     nao( Questao ),
-    nao( -Questao ),
-    nao(excecao(Questao,nulo(incerto))),
-    nao(excecao(Questao,nulo(impreciso))).
+    nao( -Questao ).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do meta-predicado nao: Questao -> {V,F}
