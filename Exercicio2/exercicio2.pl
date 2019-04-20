@@ -262,6 +262,13 @@ evolucao( Termo ) :-
     assert(Termo),
     remocaoImperfeito(Termo).
 
+% Evolução do conhecimento perfeito negativo
+evolucao(-Termo) :-
+    nao(impreciso(Termo)),
+    solucoes(Inv,+(-Termo)::Inv,Lista),
+    teste(Lista),
+    assert(-Termo).
+
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite a involucao do conhecimento positivo
 involucao( T ) :- T,
@@ -270,7 +277,7 @@ involucao( T ) :- T,
                 retract(T).
 
 involucao(-T) :- -T,
-                solucoes(I,-(-T::I),LInv),
+                solucoes(I,-(-T)::I,LInv),
                 teste(LInv),
                 retract(-T).
 
@@ -334,8 +341,9 @@ e(_,falso,falso).
 ou(verdadeiro,_,verdadeiro).
 ou(_,verdadeiro,verdadeiro).
 ou(falso,falso,falso).
-ou(X,desconhecido,desconhecido) :- nao(X == verdadeiro).
-ou(desconhecido,X,desconhecido) :- nao(X == verdadeiro).
+ou(desconhecido,desconhecido,desconhecido).
+ou(desconhecido,falso,desconhecido).
+ou(falso,desconhecido,desconhecido).
 
 % Extensao do meta-predicado si: Questao,Resposta -> {V,F}
 %                            Resposta = { verdadeiro,falso,desconhecido }
