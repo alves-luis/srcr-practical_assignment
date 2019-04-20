@@ -54,17 +54,33 @@ utente( 15 , 'Joao Miguel Abreu' , 35, 'Rua das Amoreiras' ).
 ).
 
 % Não permitir a inserção de utentes caso seja interdito adicionar a idade
-+utente(Id,Nome,Idade,Morada) :: nao(utente(Id,Nome,nulo(interdito),Morada)).
++utente(Id,Nome,Idade,Morada) :: (
+    solucoes(Id, utente(Id,Nome,nulo(interdito),Morada), L),
+    comprimento(L,N),
+    N == 0
+).
 
 % Não permitir a inserção de utentes caso seja interdito adicionar o nome
-+utente(Id,Nome,Idade,Morada) :: nao(utente(Id,nulo(interdito),Idade,Morada)).
++utente(Id,Nome,Idade,Morada) :: (
+    solucoes(Id, utente(Id,nulo(interdito),Idade,Morada), L),
+    comprimento(L,N),
+    N == 0
+).
 
 % Não permitir a inserção de utentes caso seja interdito adicionar a morada
-+utente(Id,Nome,Idade,Morada) :: nao(utente(Id,Nome,Idade,nulo(interdito))).
++utente(Id,Nome,Idade,Morada) :: (
+    solucoes(Id, utente(Id,Nome,Idade,nulo(interdito)), L),
+    comprimento(L,N),
+    N == 0
+).
 
 % Invariante Referencial
 % Não permitir a remoção de utentes que tenham cuidados associados
--utente(Id,_,_,_) :: nao(cuidado(_,Id,_,_,_)).
+-utente(Id,_,_,_) :: (
+    solucoes(Id, cuidado(_,Id,_,_,_),L),
+    comprimento(L,N),
+    N == 0
+).
 
 % Extensão do predicado prestador: Id Prestador, Nome, Especialidade, Instituição -> {V,F}
 prestador( 0 , 'Joaquim da Graca' , 'Urologia' , 'Hospital de Braga').
@@ -100,6 +116,14 @@ prestador( 9 , 'Diogo Teixeira' , 'Cardiologia' , 'Hospital de Faro').
 % Não é possível adicionar prestadores de Especialidades interditas.
 +prestador(Id,Nome,Especialidade,Instituicao) :: (nao(interdito(Especialidade))).
 
+% Invariante estrutural
+% Não é possível adicionar prestadores com especialidade que não se pode conhecer
++prestador(Id,Nome,Especialidade,Instituicao) :: (
+    solucoes(Id, prestador(Id,Nome,nulo(interdito),Instituicao), Lista),
+    comprimento(Lista,N),
+    N == 0
+).
+
 % Extensão do predicado cuidado: Data, Id Utente, Id Prestador, Descrição, Custo -> {V,F}
 cuidado(data(5,10,2018) , 0, 1 , 'cuidado ao Coracao' , 20).
 cuidado(data(19,3,2019), 1, 2,'cuidado pediatrico' , 25).
@@ -127,7 +151,11 @@ cuidado(data(18,6,2010),3,6,'cuidado ao Coracao' ,30).
 % Invariante referencial
 % Não permitir a inserção de novos cuidados se não existir o utente com
 % esse Id
-+cuidado(_,IdU,_,_,_) :: utente(IdU,_,_,_).
++cuidado(_,IdU,_,_,_) :: (
+    solucoes(IdU, utente(IdU,_,_,_), L),
+    comprimento(L,N),
+    N == 1
+).
 
 % Invariante referencial
 % Não permitir a inserção de novos cuidados se não existir o prestador
@@ -137,15 +165,14 @@ cuidado(data(18,6,2010),3,6,'cuidado ao Coracao' ,30).
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Conhecimento Perfeito Negativo
 
+% Um utente registado tem uma idade incerta mas sabemos que não são 70 anos
+utente( 5,'Joaquina',nulo(incerto),'Av.da Liberdade, Lisboa').
+-utente( 5,'Joaquina',70,'Av.da Liberdade, Lisboa').
+
 % É mentira que os utentes que fazem parte da base de conhecimento
 % tenham parâmetros diferentes do que os que estão guardados
 -utente( Id , Nome , Idade , Morada) :- nao(utente(Id,Nome,Idade,Morada)),
                                       nao(excecao(utente(Id,Nome,Idade,Morada))).
-
-
-% Um utente registado tem uma idade incerta mas sabemos que não são 70 anos
-utente( 5,'Joaquina',nulo(incerto),'Av.da Liberdade, Lisboa').
--utente( 5,'Joaquina',70,'Av.da Liberdade, Lisboa').
 
 % É mentira que os cuidados que fazem parte da base de conhecimento
 % tenham parâmetros diferentes do que os que estão guardados
@@ -154,11 +181,6 @@ utente( 5,'Joaquina',nulo(incerto),'Av.da Liberdade, Lisboa').
 
 % Sabe-se que o custo do cuidado não foi de 40
 -cuidado(data(19,3,2019), 1, 3,'Consulta breve', 40).
-
-% É mentira que os prestadores que fazem parte da base de conhecimento tenham
-% um nome diferente do que o que lhes foi associado
--prestador( Id , Nome , Esp , Inst) :- nao(prestador(Id,Nome,Esp,Inst)),
-                                       nao(excecao(prestador(Id,Nome,Esp, Inst))).
 
 % O Joaquim da Graça não presta Urologia no Hospital de Guimarães
 -prestador( 41 , 'Joaquim da Graca' , 'Urologia' , 'Hospital de Guimaraes').
@@ -176,10 +198,16 @@ utente( 5,'Joaquina',nulo(incerto),'Av.da Liberdade, Lisboa').
 -prestador( 45 , 'Marafa da Derme' , Especialidade , _ ) :-
     nao(Especialidade == 'Dermatologia').
 
+% É mentira que os prestadores que fazem parte da base de conhecimento tenham
+% um nome diferente do que o que lhes foi associado
+-prestador( Id , Nome , Esp , Inst) :- nao(prestador(Id,Nome,Esp,Inst)),
+                                       nao(excecao(prestador(Id,Nome,Esp, Inst))).
+
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Conhecimento Imperfeito
-
+% -------------------------------
 % Tipo 1 - Conhecimento Incerto
+% -------------------------------
 
 % Não se sabe o nome do utente
 utente( 6 , nulo(incerto), 30 , 'Rua dos Pomares' ).
@@ -236,6 +264,12 @@ excecao(utente( 20,'Alexandra',I,'Avenida 25 de Abril, Santarem')) :- I >= 18 , 
 
 % -------------------------------
 % Tipo 3 - Conhecimento Interdito
+% -------------------------------
+% O prestador Adelino Gomes é um prestador VIP, pelo que não
+% permite que ninguém saiba qual a sua especialidade.
+prestador( 14 , 'Adelino Gomes', nulo(interdito), 'Hospital de Santarem').
+excecao(prestador(Id, Nome, Especialidade, Instituicao)) :- prestador(Id,Nome,nulo(interdito),Instituicao).
+
 % Não é possível adicionar prestadores de Homeopatia, Acupuntura e Aromaterapia
 interdito('Homeopatia').
 interdito('Acupuntura').
@@ -276,6 +310,7 @@ involucao( T ) :- T,
                 teste(LInv),
                 retract(T).
 
+% Extensão do predicado que permite a involução de conhecimento negativo
 involucao(-T) :- -T,
                 solucoes(I,-(-T)::I,LInv),
                 teste(LInv),
@@ -305,6 +340,7 @@ remocaoIncerto(prestador(Id,Nome,Especialidade,Instituicao)) :- incerto(prestado
 remocaoIncerto(prestador(Id,_,_,_)) :- impreciso(prestador(Id)).
 
 % Extensão do predicado remocaoImperfeito: Prestador -> {V,F}
+% Provavelmente não funciona corretamente caso haja exceção do mesmo prestador
 % Permite remover todo o conhecimento imperfeito relativo a um prestador
 remocaoImperfeito(prestador(Id,_,_,_)) :- incerto(prestador(Id)),
                                          retract(incerto(prestador(Id))).
