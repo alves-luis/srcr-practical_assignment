@@ -106,6 +106,7 @@ prestador( 9 , 'Diogo Teixeira' , 'Cardiologia' , 'Hospital de Faro').
 
 % Invariante estrutural
 % Não permitir a inserção de conhecimento contraditório
+% N =< 1 porque se houver prova direta, o nº de soluções é 2 (prova direta e genérica)
 +prestador(Id,Nome,Especialidade,Instituicao) :: (
     solucoes(Id, -prestador(Id,Nome,Especialidade,Instituicao), L),
     comprimento(L,N),
@@ -121,6 +122,30 @@ prestador( 9 , 'Diogo Teixeira' , 'Cardiologia' , 'Hospital de Faro').
 +prestador(Id,Nome,Especialidade,Instituicao) :: (
     solucoes(Id, prestador(Id,Nome,nulo(interdito),Instituicao), Lista),
     comprimento(Lista,N),
+    N == 0
+).
+
+% Invariante estrutural
+% Não é possível inserir conhecimento contraditório
++(-prestador(Id,Nome,Especialidade,Instituicao)) :: (
+    solucoes(Id, prestador(Id,Nome,Especialidade,Instituicao), L),
+    comprimento(L,N),
+    N == 0
+).
+
+% Invariante estrutural
+% Não é possível adicionar uma negação que já exista
++(-prestador(Id,Nome,Especialidade,Instituicao)) :: (
+    solucoes(Id, -prestador(Id,Nome,Especialidade,Instituicao), L),
+    comprimento(L,N),
+    N =< 1
+).
+
+% Invariante referencial
+% Não permitir a remoção de prestadores se existirem cuidados associados a ele
+-prestador(Id,_,_,_) :: (
+    solucoes(Id, cuidado(_,Id,_,_), L),
+    comprimento(L,N),
     N == 0
 ).
 
@@ -172,7 +197,7 @@ utente( 5,'Joaquina',nulo(incerto),'Av.da Liberdade, Lisboa').
 % É mentira que os utentes que fazem parte da base de conhecimento
 % tenham parâmetros diferentes do que os que estão guardados
 -utente( Id , Nome , Idade , Morada) :- nao(utente(Id,Nome,Idade,Morada)),
-                                      nao(excecao(utente(Id,Nome,Idade,Morada))).
+                                        nao(excecao(utente(Id,Nome,Idade,Morada))).
 
 % É mentira que os cuidados que fazem parte da base de conhecimento
 % tenham parâmetros diferentes do que os que estão guardados
@@ -192,10 +217,10 @@ utente( 5,'Joaquina',nulo(incerto),'Av.da Liberdade, Lisboa').
 -prestador( 43 , 'Sousa Costa' , _ , Instituicao) :-
     nao(Instituicao == 'Hospital de Faro').
 
-% O Marafa da Derme apenas presta Dermatologia no Hospital de Braga
+% O Marafa da Derme apenas pode prestar Dermatologia no Hospital de Braga
 -prestador( 44 , 'Marafa da Derme' , _ , Instituicao) :-
     nao(Instituicao == 'Hospital de Braga').
--prestador( 45 , 'Marafa da Derme' , Especialidade , _ ) :-
+-prestador( 44 , 'Marafa da Derme' , Especialidade , _ ) :-
     nao(Especialidade == 'Dermatologia').
 
 % É mentira que os prestadores que fazem parte da base de conhecimento tenham
@@ -290,7 +315,6 @@ evolucao( Termo ) :-
 evolucao( Termo ) :-
     imperfeito( Termo ),
     si(Termo,desconhecido),
-    remocaoIncerto(Termo),
     solucoes(Invariante,+Termo::Invariante, Lista),
     teste(Lista),
     assert(Termo),
@@ -340,10 +364,19 @@ remocaoIncerto(prestador(Id,Nome,Especialidade,Instituicao)) :- incerto(prestado
 remocaoIncerto(prestador(Id,_,_,_)) :- impreciso(prestador(Id)).
 
 % Extensão do predicado remocaoImperfeito: Prestador -> {V,F}
-% Provavelmente não funciona corretamente caso haja exceção do mesmo prestador
 % Permite remover todo o conhecimento imperfeito relativo a um prestador
-remocaoImperfeito(prestador(Id,_,_,_)) :- incerto(prestador(Id)),
-                                         retract(incerto(prestador(Id))).
+remocaoImperfeito(prestador(Id,Nome,Especialidade,Instituicao)) :- incerto(prestador(Id)),
+        prestador(Id,Nome,nulo(incerto),Instituicao),
+        retract(prestador(Id,Nome,nulo(incerto),Instituicao)),
+        remocaoImperfeito(prestador(Id,Nome,Especialidade,Instituicao)).
+% Instituição poderá ser incerta
+remocaoImperfeito(prestador(Id,Nome,Especialidade,Instituicao)) :- incerto(prestador(Id)),
+        prestador(Id,Nome,Especialidade,nulo(incerto)),
+        retract(prestador(Id,Nome,Especialidade,nulo(incerto))),
+        remocaoImperfeito(prestador(Id,Nome,Especialidade,Instituicao)).
+remocaoImperfeito(prestador(Id,Nome,Especialidade,Instituicao)) :- incerto(prestador(Id)),
+                                         retract(incerto(prestador(Id))),
+                                         remocaoImperfeito(prestador(Id,Nome,Especialidade,Instituicao)).
 % Remove impreciso relativo a especialidade
 remocaoImperfeito(prestador(Id,Nome,Especialidade,Instituicao)) :-
     impreciso(prestador(Id)),
@@ -354,9 +387,15 @@ remocaoImperfeito(prestador(Id,Nome,Especialidade,Instituicao)) :-
     impreciso(prestador(Id)),
     retract(excecao(prestador(Id,Nome,Especialidade,Instituicao_1))),
     remocaoImperfeito(prestador(Id,Nome,Especialidade,Instituicao)).
+% Remove impreciso relativo a nome
+remocaoImperfeito(prestador(Id,Nome,Especialidade,Instituicao)) :-
+    impreciso(prestador(Id)),
+    retract(excecao(prestador(Id,Nome_1,Especialidade,Instituicao_1))),
+    remocaoImperfeito(prestador(Id,Nome,Especialidade,Instituicao)).
 % Remove anotação de impreciso
 remocaoImperfeito(prestador(Id,_,_,_)) :- impreciso(prestador(Id)),
     retract(impreciso(prestador(Id))).
+remocaoImperfeito(prestador(Id,Nome,Especialidade,Instituicao)).
 
 
 teste( [] ).
