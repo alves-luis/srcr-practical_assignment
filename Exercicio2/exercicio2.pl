@@ -144,7 +144,7 @@ prestador( 9 , 'Diogo Teixeira' , 'Cardiologia' , 'Hospital de Faro').
 % Invariante referencial
 % Não permitir a remoção de prestadores se existirem cuidados associados a ele
 -prestador(Id,_,_,_) :: (
-    solucoes(Id, cuidado(_,Id,_,_), L),
+    solucoes(Id, cuidado(_,_,Id,_,_), L),
     comprimento(L,N),
     N == 0
 ).
@@ -163,7 +163,6 @@ cuidado(data(4,9,2019),1,7,'cuidado ao Coracao' ,50).
 cuidado(data(24,12,2019),0,5,'cuidado ao Coracao' ,20).
 cuidado(data(1,1,2020),1,1,'cuidado demartologico' ,70).
 cuidado(data(4,5,2019),4,1,'cuidado demartologico' ,25).
-cuidado(data(8,8,2020),1,4,'cuidado ao Coracao' ,35).
 cuidado(data(1,1,2020),1,6,'cuidado ao Coracao' ,60).
 cuidado(data(18,6,2010),3,6,'cuidado ao Coracao' ,30).
 
